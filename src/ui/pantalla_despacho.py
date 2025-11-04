@@ -3,6 +3,7 @@ import time
 import threading
 import random
 from utils.config import RUTA_ASSETS
+from utils.logger import registrar_despacho
 
 
 
@@ -60,7 +61,7 @@ class PantallaDespacho(ft.Container):
 
         # --- Imagen del garrafón (usa page.assets_dir para mostrarla correctamente) ---
         self.garrafon_img = ft.Image(
-            src=ft.Image(src=f"{RUTA_ASSETS}\\garrafon_completo.png"),
+            src=ft.Image(src=f"{RUTA_ASSETS}\\garrafon_lleno.png"),
             width=240,
             height=260,
             fit=ft.ImageFit.CONTAIN,
@@ -114,6 +115,16 @@ class PantallaDespacho(ft.Container):
         self.regresar_callback()
 
     def simular_despacho(self):
+        snackbar = ft.SnackBar(
+                        content=ft.Text(
+                            "✅ Registro guardado correctamente / Record saved successfully",
+                            color="white"
+                        ),
+                        bgcolor="#004c8c",
+                        duration=2000,  # milisegundos (2 segundos)
+                        show_close_icon=True,
+                        open=True,
+                    )
         """Simula el llenado del garrafón."""
         while self.litros_actual < self.litros_total and self.despachando:
             time.sleep(0.3)
@@ -128,6 +139,36 @@ class PantallaDespacho(ft.Container):
         if self.despachando:
             self.texto_estado.value = "✅ Llenado completo / Filling complete"
             self.page.update()
+
+            # 💾 Registrar datos según el tipo de acción
+            if self.litros_total == 0:
+                # Modo lavado (no hay litros pero sí costo de servicio)
+                registrar_despacho(0, 5)
+            else:
+                # Modo llenado normal
+                precio_por_litro = 0.5
+                monto = self.litros_total * precio_por_litro
+                registrar_despacho(self.litros_total, monto)
+
+            # ✅ Mostrar notificación visual (toast)
+            snackbar = ft.SnackBar(
+                content=ft.Text(
+                    "✅ Registro guardado correctamente / Record saved successfully",
+                    color="white"
+                ),
+                bgcolor="#004c8c",
+                duration=2000,
+                show_close_icon=True,
+                open=True,
+            )
+
+            # Agregar y actualizar
+            self.page.overlay.append(snackbar)
+            self.page.update()
+
+            time.sleep(1.5)
+            self.regresar_callback()
+
             time.sleep(1.5)
             self.regresar_callback()
 
