@@ -1,4 +1,7 @@
 import flet as ft
+from ui.pantalla_despacho import PantallaDespacho
+from utils.config import RUTA_ASSETS
+
 
 class PantallaPrincipal(ft.Column):
     """Pantalla inicial de selección de cantidad de agua."""
@@ -9,9 +12,21 @@ class PantallaPrincipal(ft.Column):
         self.horizontal_alignment = "center"
         self.spacing = 25
         self.build_ui()
+        
+        def ir_a_despacho(litros):
+            self.page.clean()
+            self.page.add(PantallaDespacho(self.page, litros, regresar_callback=volver_menu))
+
+        def volver_menu():
+            self.page.clean()
+            self.page.add(PantallaPrincipal(self.page))
+
+        self.boton_5.on_click = lambda _: ir_a_despacho(5)
+        self.boton_10.on_click = lambda _: ir_a_despacho(10)
+        self.boton_20.on_click = lambda _: ir_a_despacho(20)
 
     def build_ui(self):
-        self.logo = ft.Image(src="../assets/logo.png", width=120, height=120)
+        self.logo = ft.Image(src=f"{RUTA_ASSETS}\\logo.png", width=120, height=120)
         self.titulo = ft.Text(
             "SELECT YOUR WATER AMOUNT\nSELECCIONE LA CANTIDAD DE AGUA",
             size=22,
@@ -29,3 +44,6 @@ class PantallaPrincipal(ft.Column):
             self.titulo,
             ft.Row([self.boton_5, self.boton_10, self.boton_20], alignment="center")
         ]
+    
+
+
